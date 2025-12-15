@@ -132,48 +132,97 @@
         @media (max-width: 1000px) {
             .streamer-grid { grid-template-columns: 1fr; }
         }
+
+        /* <style> 태그 안에 추가 또는 수정하세요 */
+
+        /* 링크 기본 스타일 제거 */
+        .card-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        
+        .card {
+            position: relative;
+            height: 240px;
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            overflow: hidden;
+            cursor: pointer; /* 마우스 커서를 손가락 모양으로 */
+        }
+        
+        /* 마우스를 올렸을 때 카드가 살짝 밝아지고 커지는 효과 */
+        .card-link:hover .card {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            filter: brightness(1.1);
+        }
+        
+        /* 삭제 버튼 위치 조정 (카드 밖이 아닌 카드 우측 상단 고정) */
+        .del-btn {
+            position: absolute;
+            top: 25px; 
+            right: 25px;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            border: none;
+            width: 35px; 
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10; /* 카드 링크보다 위에 있도록 설정 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            font-size: 20px;
+            transition: background 0.2s;
+        }
+        
+        .del-btn:hover {
+            background: #ff4b4b !important;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1 style="text-align: center; font-size: 2.5rem; margin-bottom: 40px;">
-        CHZZK <span style="color: var(--chzzk-green);">DASHBOARD</span>
-    </h1>
-
-    <form class="add-box" action="/add" method="post">
-        <input type="text" name="channel_id" placeholder="등록할 스트리머의 32자리 채널 ID를 입력하세요" required>
-        <button type="submit">스트리머 추가</button>
-    </form>
-
-    <div class="streamer-grid">
-        {% for s in streamers %}
-            {% set theme_num = (loop.index % 5) + 1 %}
-            <div class="card {{ 'is-live' if s.status == 'OPEN' }}" 
-                 style="background: var(--theme-{{ theme_num }});">
-                
-                <a href="/delete/{{ s.id }}" class="del-btn" onclick="return confirm('삭제하시겠습니까?')">×</a>
-                
-                <img src="{{ s.img }}" class="profile-img">
-                
-                <div class="info">
-                    <div class="name">
-                        {% if s.status == 'OPEN' %}<span class="live-badge">LIVE</span>{% endif %}
-                        {{ s.name }}
+<div class="streamer-grid">
+    {% for s in streamers %}
+        {% set theme_num = (loop.index % 5) + 1 %}
+        
+        <div class="card-container" style="position: relative;">
+            <a href="/delete/{{ s.id }}" class="del-btn" onclick="event.stopPropagation(); return confirm('삭제하시겠습니까?')" title="삭제">×</a>
+            
+            <a href="https://chzzk.naver.com/{{ s.id }}" target="_blank" class="card-link">
+                <div class="card {{ 'is-live' if s.status == 'OPEN' }}" 
+                     style="background: var(--theme-{{ theme_num }});">
+                    
+                    <img src="{{ s.img }}" class="profile-img">
+                    
+                    <div class="info">
+                        <div class="name">
+                            {% if s.status == 'OPEN' %}<span class="live-badge">LIVE</span>{% endif %}
+                            {{ s.name }}
+                        </div>
+                        <div class="title">{{ s.title }}</div>
+                        {% if s.status == 'OPEN' %}
+                        <div class="meta">● {{ "{:,}".format(s.viewers) }}명 시청 중 · {{ s.category }}</div>
+                        {% else %}
+                        <div style="color: rgba(255,255,255,0.4)">현재 방송 종료</div>
+                        {% endif %}
                     </div>
-                    <div class="title">{{ s.title }}</div>
-                    {% if s.status == 'OPEN' %}
-                    <div class="meta">● {{ "{:,}".format(s.viewers) }}명 시청 중 · {{ s.category }}</div>
-                    {% else %}
-                    <div style="color: rgba(255,255,255,0.4)">현재 방송 종료</div>
-                    {% endif %}
+                    
+                    <div class="bg-deco">{{ s.name[0] }}</div>
                 </div>
-                
-                <div class="bg-deco">{{ s.name[0] }}</div>
-            </div>
-        {% endfor %}
-    </div>
+            </a>
+        </div>
+    {% endfor %}
 </div>
 
 </body>
+
 </html>
